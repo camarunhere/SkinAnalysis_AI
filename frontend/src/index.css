@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 1; }
+  50% { opacity: 0.45; }
+}
+.skeleton { animation: pulse-soft 1.4s ease-in-out infinite; }
+
+/* Unique per-page entrance animations — only one is active at a time,
+   picked per tab in App.jsx, so switching pages always feels distinct
+   rather than reusing one generic transition everywhere. */
+@keyframes fade-in-up { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes fade-up-page { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes slide-right-page { from { opacity: 0; transform: translateX(-26px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes slide-left-page { from { opacity: 0; transform: translateX(26px); } to { opacity: 1; transform: translateX(0); } }
+@keyframes zoom-in-page { from { opacity: 0; transform: scale(0.93); } to { opacity: 1; transform: scale(1); } }
+@keyframes fade-down-page { from { opacity: 0; transform: translateY(-16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes soft-scale-page { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
+@keyframes pulse-in-page { 0% { opacity: 0; transform: scale(0.92); } 65% { opacity: 1; transform: scale(1.015); } 100% { transform: scale(1); } }
+@keyframes flip-in-page { from { opacity: 0; transform: perspective(600px) rotateX(10deg) translateY(8px); } to { opacity: 1; transform: perspective(600px) rotateX(0) translateY(0); } }
+@keyframes slide-up-fast-page { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes stagger-rise-item { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+
+@media (prefers-reduced-motion: no-preference) {
+  .animate-fade-in-up { animation: fade-in-up 0.35s ease both; }
+  .animate-fade-up-page { animation: fade-up-page 0.45s ease both; }
+  .animate-slide-right-page { animation: slide-right-page 0.4s ease both; }
+  .animate-slide-left-page { animation: slide-left-page 0.4s ease both; }
+  .animate-zoom-in-page { animation: zoom-in-page 0.45s cubic-bezier(.2,.8,.2,1) both; }
+  .animate-fade-down-page { animation: fade-down-page 0.4s ease both; }
+  .animate-soft-scale-page { animation: soft-scale-page 0.4s ease both; }
+  .animate-pulse-in-page { animation: pulse-in-page 0.5s ease both; }
+  .animate-flip-in-page { animation: flip-in-page 0.5s ease both; transform-origin: top center; }
+  .animate-slide-up-fast-page { animation: slide-up-fast-page 0.35s ease both; }
+  .stagger-item { animation: stagger-rise-item 0.4s ease both; }
+}

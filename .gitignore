@@ -1,0 +1,8 @@
+node_modules/
+.venv/
+dist/
+*.log
+server/.env
+server/uploads/
+models/*.keras
+models/*.weights.h5
