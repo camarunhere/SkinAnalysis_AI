@@ -4,6 +4,7 @@ import express from "express";
 import { connectDb } from "./db.js";
 import { ensureMlService } from "./mlProcess.js";
 import { mlHealth } from "./mlClient.js";
+import { ensureProductCatalog } from "./productCatalog.js";
 import authRoutes from "./routes/auth.js";
 import analysisRoutes from "./routes/analysis.js";
 import adminRoutes from "./routes/admin.js";
@@ -34,6 +35,7 @@ app.get("*", (req, res) => {
 
 const start = async () => {
   await connectDb();
+  await ensureProductCatalog();
   await ensureMlService();
   app.listen(PORT, () => console.log(`[server] http://127.0.0.1:${PORT}`));
 };
