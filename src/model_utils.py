@@ -67,9 +67,14 @@ def preprocess(pil_image: Image.Image):
 
 
 def compute_gradcam(model, img_array, class_index):
-    grad_model = tf.keras.models.Model(model.inputs, [model.get_layer(LAST_CONV_LAYER).output, model.output])
+    model_output = model.output
+    if isinstance(model_output, (list, tuple)):
+        model_output = model_output[0]
+    grad_model = tf.keras.models.Model(model.inputs, [model.get_layer(LAST_CONV_LAYER).output, model_output])
     with tf.GradientTape() as tape:
         conv_out, preds = grad_model(img_array)
+        if isinstance(preds, (list, tuple)):
+            preds = preds[0]
         class_channel = preds[:, class_index]
     grads = tape.gradient(class_channel, conv_out)
     pooled_grads = tf.reduce_mean(grads, axis=(0, 1, 2))
