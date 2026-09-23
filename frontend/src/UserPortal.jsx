@@ -107,7 +107,13 @@ function Analyze({ onNavigate }) {
       <Card title="Upload a skin image">
         <Alert>{error}</Alert>
         <form onSubmit={submit} className="space-y-4">
-          <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} className="text-sm" />
+          <div className="flex items-center gap-2">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-rose-600 shrink-0" aria-hidden="true">
+              <path d="M12 15V4M12 4 8 8M12 4l4 4" />
+              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+            </svg>
+            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} className="text-sm" />
+          </div>
           {preview && (
             <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-xl border border-slate-200" />
           )}
