@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { api, apiUpload, mediaUrl, useApi } from "./api";
 import {
   Alert, Button, Card, ConditionBadge, CountUp, Field, ProbabilityBar,
@@ -65,6 +65,7 @@ function Dashboard({ onNavigate }) {
 // ---- Analyze (upload -> validate -> predict -> gradcam -> recommend -> display) --
 
 function Analyze({ onNavigate }) {
+  const fileInputRef = useRef(null);
   const [file, setFile] = useState(null);
   const [preview, setPreview] = useState(null);
   const [busy, setBusy] = useState(false);
@@ -107,12 +108,22 @@ function Analyze({ onNavigate }) {
       <Card title="Upload a skin image">
         <Alert>{error}</Alert>
         <form onSubmit={submit} className="space-y-4">
-          <div className="flex items-center gap-2">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-5 h-5 text-rose-600 shrink-0" aria-hidden="true">
-              <path d="M12 15V4M12 4 8 8M12 4l4 4" />
-              <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
-            </svg>
-            <input type="file" accept="image/jpeg,image/png,image/webp" onChange={pick} className="text-sm" />
+          <div className="flex items-center gap-3">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              onChange={pick}
+              className="hidden"
+            />
+            <Button type="button" variant="subtle" onClick={() => fileInputRef.current?.click()}>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="w-4 h-4 inline-block align-[-3px] mr-1.5" aria-hidden="true">
+                <path d="M12 15V4M12 4 8 8M12 4l4 4" />
+                <path d="M4 15v3a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-3" />
+              </svg>
+              Choose File
+            </Button>
+            <span className="text-sm text-slate-500 truncate">{file ? file.name : "No file chosen"}</span>
           </div>
           {preview && (
             <img src={preview} alt="Preview" className="w-40 h-40 object-cover rounded-xl border border-slate-200" />
