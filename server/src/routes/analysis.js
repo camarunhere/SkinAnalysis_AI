@@ -3,6 +3,7 @@ import { mkdirSync, writeFileSync } from "node:fs";
 import path from "node:path";
 import { Router } from "express";
 import multer from "multer";
+import { asyncHandler } from "../asyncHandler.js";
 import { requireAuth } from "../auth.js";
 import { mlAnalyze } from "../mlClient.js";
 import { Analysis, Product, logActivity } from "../models.js";
@@ -88,20 +89,20 @@ router.post("/upload", requireAuth, (req, res) => {
   });
 });
 
-router.get("/history", requireAuth, async (req, res) => {
+router.get("/history", requireAuth, asyncHandler(async (req, res) => {
   const items = await Analysis.find({ user: req.user._id }).sort({ createdAt: -1 }).limit(50).populate("recommendedProducts");
   res.json(items.map(analysisPayload));
-});
+}));
 
-router.get("/latest", requireAuth, async (req, res) => {
+router.get("/latest", requireAuth, asyncHandler(async (req, res) => {
   const item = await Analysis.findOne({ user: req.user._id }).sort({ createdAt: -1 }).populate("recommendedProducts");
   res.json(item ? analysisPayload(item) : null);
-});
+}));
 
-router.get("/:id", requireAuth, async (req, res) => {
-  const item = await Analysis.findOne({ _id: req.params.id, user: req.user._id }).populate("recommendedProducts");
+router.get("/:id", requireAuth, asyncHandler(async (req, res) => {
+  const item = await Analysis.findOne({ _id: req.params.id, user: req.user._id }).populate("recommendedProducts").catch(() => null);
   if (!item) return res.status(404).json({ detail: "Analysis not found." });
   res.json(analysisPayload(item));
-});
+}));
 
 export default router;

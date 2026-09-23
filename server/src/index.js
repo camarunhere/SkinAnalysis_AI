@@ -51,6 +51,16 @@ if (existsSync(FRONTEND_DIST)) {
   });
 }
 
+// Safety net: any error forwarded via next(err) (see asyncHandler.js) lands
+// here instead of crashing the process. Mongoose's CastError (e.g. a
+// malformed :id) becomes a 400; anything unexpected becomes a generic 500
+// with no internal details leaked to the client.
+app.use((err, req, res, next) => {
+  console.error(err);
+  if (err.name === "CastError") return res.status(400).json({ detail: "Invalid ID." });
+  res.status(500).json({ detail: "Something went wrong." });
+});
+
 const start = async () => {
   await connectDb();
   await ensureProductCatalog();

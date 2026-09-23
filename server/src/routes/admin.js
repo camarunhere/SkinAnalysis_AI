@@ -1,4 +1,5 @@
 import { Router } from "express";
+import { asyncHandler } from "../asyncHandler.js";
 import { requireRole } from "../auth.js";
 import { mlHealth, mlMetadata } from "../mlClient.js";
 import { Analysis, Product, User, SKIN_CONDITIONS, logActivity } from "../models.js";
@@ -19,26 +20,26 @@ function productPayload(p) {
   };
 }
 
-router.get("/users", async (req, res) => {
+router.get("/users", asyncHandler(async (req, res) => {
   const users = await User.find({ role: "user" }).sort({ createdAt: -1 });
   res.json(users.map(userPayload));
-});
+}));
 
-router.put("/users/:id/block", async (req, res) => {
-  const user = await User.findById(req.params.id);
+router.put("/users/:id/block", asyncHandler(async (req, res) => {
+  const user = await User.findById(req.params.id).catch(() => null);
   if (!user) return res.status(404).json({ detail: "User not found." });
   user.isBlocked = !user.isBlocked;
   await user.save();
   await logActivity(req.user, "admin_block_toggle", `target=${user.email} blocked=${user.isBlocked}`);
   res.json(userPayload(user));
-});
+}));
 
-router.get("/products", async (req, res) => {
+router.get("/products", asyncHandler(async (req, res) => {
   const products = await Product.find().sort({ condition: 1, category: 1 });
   res.json(products.map(productPayload));
-});
+}));
 
-router.post("/products", async (req, res) => {
+router.post("/products", asyncHandler(async (req, res) => {
   const { name, condition, category, description, usage_instructions } = req.body || {};
   if (!name || String(name).trim().length < 2)
     return res.status(422).json({ detail: "Product name is too short." });
@@ -52,10 +53,10 @@ router.post("/products", async (req, res) => {
     description: description || "", usageInstructions: usage_instructions || "",
   });
   res.json(productPayload(product));
-});
+}));
 
-router.put("/products/:id", async (req, res) => {
-  const product = await Product.findById(req.params.id);
+router.put("/products/:id", asyncHandler(async (req, res) => {
+  const product = await Product.findById(req.params.id).catch(() => null);
   if (!product) return res.status(404).json({ detail: "Product not found." });
   const { name, condition, category, description, usage_instructions } = req.body || {};
   if (name) product.name = name;
@@ -65,14 +66,14 @@ router.put("/products/:id", async (req, res) => {
   if (usage_instructions !== undefined) product.usageInstructions = usage_instructions;
   await product.save();
   res.json(productPayload(product));
-});
+}));
 
-router.delete("/products/:id", async (req, res) => {
-  await Product.findByIdAndDelete(req.params.id);
+router.delete("/products/:id", asyncHandler(async (req, res) => {
+  await Product.findByIdAndDelete(req.params.id).catch(() => null);
   res.json({ message: "Product deleted." });
-});
+}));
 
-router.get("/reports", async (req, res) => {
+router.get("/reports", asyncHandler(async (req, res) => {
   const [totalUsers, totalAnalyses, urgentReferrals, conditionAgg] = await Promise.all([
     User.countDocuments({ role: "user" }),
     Analysis.countDocuments(),
@@ -98,14 +99,14 @@ router.get("/reports", async (req, res) => {
     condition_distribution: conditionCounts,
     analyses_per_day: dailyAgg.map((r) => ({ date: r._id, count: r.count })),
   });
-});
+}));
 
-router.get("/model", async (req, res) => {
+router.get("/model", asyncHandler(async (req, res) => {
   const [health, metadata] = await Promise.all([
     mlHealth().catch(() => ({ status: "down", model_loaded: false })),
     mlMetadata().catch(() => null),
   ]);
   res.json({ health, metadata });
-});
+}));
 
 export default router;
