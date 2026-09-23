@@ -1,5 +1,7 @@
+import { existsSync } from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
+import cors from "cors";
 import express from "express";
 import { connectDb } from "./db.js";
 import { ensureMlService } from "./mlProcess.js";
@@ -14,7 +16,17 @@ const FRONTEND_DIST = path.resolve(__dirname, "..", "..", "frontend", "dist");
 const UPLOAD_ROOT = path.resolve(process.cwd(), "uploads");
 const PORT = process.env.PORT || 5000;
 
+// When the frontend is deployed separately (e.g. Vercel) from this API
+// (e.g. Render), set CORS_ORIGIN to a comma-separated list of allowed
+// origins. Left unset, all origins are allowed — fine for same-origin
+// deployments where the API also serves the built frontend below.
+const allowedOrigins = (process.env.CORS_ORIGIN || "")
+  .split(",")
+  .map((s) => s.trim())
+  .filter(Boolean);
+
 const app = express();
+app.use(cors({ origin: allowedOrigins.length ? allowedOrigins : true }));
 app.use(express.json({ limit: "2mb" }));
 app.use("/uploads", express.static(UPLOAD_ROOT));
 
@@ -27,11 +39,17 @@ app.use("/api/auth", authRoutes);
 app.use("/api/analysis", analysisRoutes);
 app.use("/api/admin", adminRoutes);
 
-app.use(express.static(FRONTEND_DIST));
-app.get("*", (req, res) => {
-  if (req.path.startsWith("/api/")) return res.status(404).json({ detail: "Not found." });
-  res.sendFile(path.join(FRONTEND_DIST, "index.html"));
-});
+// Only present when the frontend was built alongside this server (local/combined
+// deployments). When the frontend is deployed separately (e.g. Vercel), this is
+// absent and the API simply returns 404s for any non-API path, which is fine
+// since the frontend is served from its own domain.
+if (existsSync(FRONTEND_DIST)) {
+  app.use(express.static(FRONTEND_DIST));
+  app.get("*", (req, res) => {
+    if (req.path.startsWith("/api/")) return res.status(404).json({ detail: "Not found." });
+    res.sendFile(path.join(FRONTEND_DIST, "index.html"));
+  });
+}
 
 const start = async () => {
   await connectDb();

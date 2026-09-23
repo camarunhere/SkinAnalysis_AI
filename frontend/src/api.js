@@ -3,6 +3,17 @@ import { useEffect, useState, useCallback } from "react";
 const TOKEN_KEY = "ska_token";
 const USER_KEY = "ska_user";
 
+// When the frontend is deployed separately from the backend (e.g. frontend on
+// Vercel, backend on Render), set VITE_API_URL to the backend's full URL
+// (e.g. https://skinanalysis-api.onrender.com). Left unset, requests go to
+// the same origin the frontend is served from — used for local dev (via the
+// Vite proxy) and combined deployments where one server serves both.
+const API_BASE = import.meta.env.VITE_API_URL || "";
+
+/** Prefixes a `/uploads/...` path from the API with the backend's origin, so
+ * <img> tags work when the frontend and backend are on different domains. */
+export const mediaUrl = (path) => (path ? `${API_BASE}${path}` : path);
+
 export const getToken = () => localStorage.getItem(TOKEN_KEY);
 export const getStoredUser = () => {
   try {
@@ -43,7 +54,7 @@ export async function api(path, { method = "GET", body } = {}) {
   if (token) headers["Authorization"] = `Bearer ${token}`;
   if (body) headers["Content-Type"] = "application/json";
 
-  const res = await fetch(path, { method, headers, body: body ? JSON.stringify(body) : undefined });
+  const res = await fetch(`${API_BASE}${path}`, { method, headers, body: body ? JSON.stringify(body) : undefined });
   return handleResponse(res, token);
 }
 
@@ -53,7 +64,7 @@ export async function apiUpload(path, formData) {
   const token = getToken();
   if (token) headers["Authorization"] = `Bearer ${token}`;
 
-  const res = await fetch(path, { method: "POST", headers, body: formData });
+  const res = await fetch(`${API_BASE}${path}`, { method: "POST", headers, body: formData });
   return handleResponse(res, token);
 }
 

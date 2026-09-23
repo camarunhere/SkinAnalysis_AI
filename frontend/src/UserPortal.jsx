@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { api, apiUpload, useApi } from "./api";
+import { api, apiUpload, mediaUrl, useApi } from "./api";
 import {
   Alert, Button, Card, ConditionBadge, CountUp, Field, ProbabilityBar,
   Skeleton, Spinner, conditionStyle, fmtDate, inputCls,
@@ -118,10 +118,10 @@ function Analyze({ onNavigate }) {
       {result && (
         <div className="grid sm:grid-cols-2 gap-6 animate-fade-in-up">
           <Card title="Original image">
-            <img src={result.image_url} alt="Uploaded skin" className="w-full rounded-xl border border-slate-200" />
+            <img src={mediaUrl(result.image_url)} alt="Uploaded skin" className="w-full rounded-xl border border-slate-200" />
           </Card>
           <Card title="Grad-CAM explanation">
-            {result.gradcam_url && <img src={result.gradcam_url} alt="Grad-CAM heatmap" className="w-full rounded-xl border border-slate-200" />}
+            {result.gradcam_url && <img src={mediaUrl(result.gradcam_url)} alt="Grad-CAM heatmap" className="w-full rounded-xl border border-slate-200" />}
           </Card>
 
           <Card title="Result" className="sm:col-span-2">
@@ -177,10 +177,10 @@ function Explain() {
 
       <div className="grid sm:grid-cols-2 gap-6">
         <Card title="Original image">
-          <img src={item.image_url} alt="Uploaded skin" className="w-full rounded-xl border border-slate-200" />
+          <img src={mediaUrl(item.image_url)} alt="Uploaded skin" className="w-full rounded-xl border border-slate-200" />
         </Card>
         <Card title="Grad-CAM heatmap">
-          {item.gradcam_url && <img src={item.gradcam_url} alt="Grad-CAM heatmap" className="w-full rounded-xl border border-slate-200" />}
+          {item.gradcam_url && <img src={mediaUrl(item.gradcam_url)} alt="Grad-CAM heatmap" className="w-full rounded-xl border border-slate-200" />}
           <p className="text-xs text-slate-400 mt-2">Warmer colors show where the model focused most to reach its conclusion.</p>
         </Card>
       </div>
@@ -276,7 +276,7 @@ function History() {
       <div className="space-y-2 max-h-[32rem] overflow-y-auto">
         {data.map((a, i) => (
           <div key={a.id} className="stagger-item flex items-center gap-4 py-2.5 border-b border-slate-100 last:border-0" style={{ animationDelay: `${Math.min(i, 10) * 60}ms` }}>
-            <img src={a.image_url} alt="" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
+            <img src={mediaUrl(a.image_url)} alt="" className="w-12 h-12 rounded-lg object-cover border border-slate-200" />
             <div className="flex-1">
               <p className="text-sm font-medium text-slate-700">{conditionStyle(a.condition).label}</p>
               <p className="text-xs text-slate-400">{fmtDate(a.created_at)}</p>
